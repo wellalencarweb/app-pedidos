@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+    mongo:
+        container_name: fastFoodMongodb
+        image: mongo:latest
+        ports:
+            - "27017:27017"
+        volumes:
+            - ./data/db:/data/db
+        networks:
+            - fastFoodNetwork
+    api:
+        container_name: fastFoodApi
+        build: "."
+        working_dir: /fastFood
+        environment:
+            NODE_ENV: development
+            MONGODB_CONN_STRING: mongodb://mongo:27017
+        command: sh -c "npm run start"
+        depends_on:
+            postgres:
+                condition: service_healthy
+            mongo:
+                condition: service_started
+        ports:
+            - "6001:6001"
+        networks:
+            - fastFoodNetwork
+networks:
+    fastFoodNetwork:
+        driver: bridge
